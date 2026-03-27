@@ -1,16 +1,49 @@
 package org.example
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-fun main() {
-    val name = "Kotlin"
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    println("Hello, " + name + "!")
+import com.mongodb.kotlin.client.coroutine.MongoClient
+import com.mongodb.kotlin.client.coroutine.MongoCollection
+import kotlinx.coroutines.runBlocking
+import org.bson.Document
 
-    for (i in 1..5) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        println("i = $i")
-    }
+//hacer algo con parse string relacionado con la base de datos en mongoDB
+//contrasenya dvus@Gvhv6FhcyP
+
+fun main() = runBlocking {
+    val connectionString = "mongodb+srv://lautarorodriguez7e9_db_user:<dvus@Gvhv6FhcyP>@cluster0.bykrvj1.mongodb.net/dmuKgXpnFp7bz6ZT"
+    val client = MongoClient.create(connectionString)
+    val database = client.getDatabase("sample_training")
+    val collection = database.getCollection<Document>("grades")
+
+    ejercicio1(collection)
+
+    client.close()
+}
+
+suspend fun ejercicio1(collection: MongoCollection<Document>) {
+    val estudiant1 = Document()
+        .append("student_id", 111333444)
+        .append("name", "Lautaro")
+        .append("surname", "Rodriguez")
+        .append("class_id", "DAM")
+        .append("group", "el teu grup")
+        .append("scores", listOf(
+            Document("type", "exam").append("score", 100),
+            Document("type", "teamWork").append("score", 50)
+        ))
+
+    val estudiant2 = Document()
+        .append("student_id", 111222333)
+        .append("name", "Iago")
+        .append("surname", "Zahonero")
+        .append("class_id", "Undefined")
+        .append("group", "el teu grup")
+        .append("interests", listOf("music", "gym", "code", "electronics"))
+
+    collection.insertOne(estudiant1)
+    collection.insertOne(estudiant2)
+    println("Estudiants inserits correctament!")
+}
+
+suspend fun ejercicio2(collection: MongoCollection<Document>) {
+    // aquí les consultes
 }
