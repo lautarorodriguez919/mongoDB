@@ -1,27 +1,26 @@
 package org.example
 
-import com.mongodb.kotlin.client.coroutine.MongoClient
-import com.mongodb.kotlin.client.coroutine.MongoCollection
-import kotlinx.coroutines.runBlocking
+import com.mongodb.client.MongoClients
+import com.mongodb.client.MongoCollection
+import com.mongodb.client.model.Filters.*
 import org.bson.Document
+import org.bson.conversions.Bson
 
-//hacer algo con parse string relacionado con la base de datos en mongoDB
-//contrasenya dvus@Gvhv6FhcyP
-
-fun main() = runBlocking {
-    val connectionString = "mongodb+srv://lautarorodriguez7e9_db_user:<dvus@Gvhv6FhcyP>@cluster0.bykrvj1.mongodb.net/dmuKgXpnFp7bz6ZT"
-    val client = MongoClient.create(connectionString)
-    val database = client.getDatabase("sample_training")
-    val collection = database.getCollection<Document>("grades")
-
+fun main() {
+    val collection = conectar()
     ejercicio1(collection)
-
-    client.close()
+    ejercicio2(collection)
 }
 
-suspend fun ejercicio1(collection: MongoCollection<Document>) {
-    val estudiant1 = Document()
-        .append("student_id", 111333444)
+fun conectar(): MongoCollection<Document> {
+    val uri = "mongodb+srv://lautarorodriguez7e9_db_user:Password123@cluster0.bykrvj1.mongodb.net/?retryWrites=true&writeConcern=majority"
+    val mongoClient = MongoClients.create(uri)
+    val db = mongoClient.getDatabase("sample_training")
+    return db.getCollection("grades")
+}
+
+fun ejercicio1(coll: MongoCollection<Document>) {
+    val estudiant1 = Document("student_id", 111333444)
         .append("name", "Lautaro")
         .append("surname", "Rodriguez")
         .append("class_id", "DAM")
@@ -31,19 +30,49 @@ suspend fun ejercicio1(collection: MongoCollection<Document>) {
             Document("type", "teamWork").append("score", 50)
         ))
 
-    val estudiant2 = Document()
-        .append("student_id", 111222333)
+    val estudiant2 = Document("student_id", 111222333)
         .append("name", "Iago")
         .append("surname", "Zahonero")
         .append("class_id", "Undefined")
         .append("group", "el teu grup")
         .append("interests", listOf("music", "gym", "code", "electronics"))
 
-    collection.insertOne(estudiant1)
-    collection.insertOne(estudiant2)
+    coll.insertOne(estudiant1)
+    coll.insertOne(estudiant2)
     println("Estudiants inserits correctament!")
 }
 
-suspend fun ejercicio2(collection: MongoCollection<Document>) {
-    // aquí les consultes
+fun ejercicio2(coll: MongoCollection<Document>) {
+
+    println("\n=== Estudiants del grup ===")
+    var filter: Bson = eq("group", "el teu grup")
+    var cursor = coll.find(filter).iterator()
+    while (cursor.hasNext()) {
+        println(cursor.next().toJson())
+    }
+
+
+    println("\n=== Estudiants amb 100 a l'exam ===")
+    filter = elemMatch("scores", and(eq("type", "exam"), eq("score", 100)))
+    cursor = coll.find(filter).iterator()
+    while (cursor.hasNext()) {
+        println(cursor.next().toJson())
+    }
+
+
+    println("\n=== Estudiants amb menys de 50 a l'exam ===")
+    filter = elemMatch("scores", and(eq("type", "exam"), lt("score", 50)))
+    cursor = coll.find(filter).iterator()
+    while (cursor.hasNext()) {
+        println(cursor.next().toJson())
+    }
+
+
+    println("\n=== Interessos de l'estudiant 111222333 ===")
+    filter = eq("student_id", 111222333)
+    cursor = coll.find(filter).iterator()
+    while (cursor.hasNext()) {
+        val doc = cursor.next()
+        println(doc.getList("interests", String::class.java))
+    }
 }
