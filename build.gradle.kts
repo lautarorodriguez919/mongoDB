@@ -1,8 +1,19 @@
 plugins {
     kotlin("jvm") version "2.3.0"
-    kotlin("plugin.jpa") version "1.9.0"
-    kotlin("plugin.allopen") version "1.9.0"
+    kotlin("plugin.jpa") version "2.3.0"
+    kotlin("plugin.allopen") version "2.3.0"
     application
+}
+
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 application {
     mainClass.set("Practica_Hibernate.MainKt")
